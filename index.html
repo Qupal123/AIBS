@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0e1a">
+  <title>BrawlDraft · Ranked Draft Helper</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="particles"></canvas>
+  <div class="glow glow-top"></div>
+  <div class="glow glow-bottom"></div>
+  <div id="app">
+    <section class="screen active" data-screen="home" id="screen-home">
+      <div class="logo-wrap">
+        <div class="lightning pulse">⚡</div>
+        <div class="title">
+          <span class="title-main">BRAWL</span><span class="title-accent">DRAFT</span>
+        </div>
+        <p class="subtitle">Ranked Draft Helper</p>
+      </div>
+      <div class="home-actions">
+        <button class="primary" id="start-btn">Начать Ranked Draft</button>
+      </div>
+      <div class="meta-badge">
+        <span class="dot"></span>
+        Мета актуальна · Баффи учтены
+      </div>
+    </section>
+
+    <section class="screen" data-screen="rank" id="screen-rank">
+      <div class="header">
+        <button class="ghost back-btn" data-target="home">Назад</button>
+        <h1>Выбор ранга</h1>
+      </div>
+      <div id="current-rank-card" class="current-rank"></div>
+      <div id="rank-grid" class="grid grid-ranks"></div>
+    </section>
+
+    <section class="screen" data-screen="mode" id="screen-mode">
+      <div class="header">
+        <button class="ghost back-btn" data-target="rank">Назад</button>
+        <h1>Выбор режима</h1>
+      </div>
+      <div class="list" id="mode-list"></div>
+    </section>
+
+    <section class="screen" data-screen="map" id="screen-map">
+      <div class="header">
+        <button class="ghost back-btn" data-target="mode">Назад</button>
+        <h1>Выбор карты</h1>
+      </div>
+      <div class="list vertical" id="map-list"></div>
+    </section>
+
+    <section class="screen" data-screen="order" id="screen-order">
+      <div class="header">
+        <button class="ghost back-btn" data-target="map">Назад</button>
+        <h1>Порядок пика</h1>
+      </div>
+      <div id="order-summary" class="summary-card"></div>
+      <div class="toggle-group">
+        <button class="toggle active" data-order="us">👤 Мы выбираем первыми</button>
+        <button class="toggle" data-order="enemy">👥 Противник выбирает первым</button>
+      </div>
+      <button class="primary" id="go-recs">Получить рекомендации →</button>
+    </section>
+
+    <section class="screen" data-screen="recs" id="screen-recs">
+      <div class="header">
+        <button class="ghost back-btn" data-target="order">Назад</button>
+        <h1>Рекомендации</h1>
+      </div>
+      <div id="rec-summary" class="summary-card large"></div>
+      <div class="block">
+        <div class="block-title danger">🚫 Баны</div>
+        <div id="ban-cards" class="cards horizontal"></div>
+      </div>
+      <div class="block">
+        <div class="block-title electric">⚡ Пики</div>
+        <div class="meta-note">Пики учитывают текущую мету и баффи</div>
+        <div id="pick-cards" class="cards vertical"></div>
+      </div>
+      <div class="block">
+        <div class="block-title warning">💡 Альтернативы</div>
+        <div id="alt-cards" class="cards horizontal"></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
