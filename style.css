@@ -738,3 +738,36 @@ h1 {
     transform: translateY(0);
   }
 }
+
+.update-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--card);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.update-notification.hidden {
+  display: none;
+}
+
+.update-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.update-content span {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.primary.small {
+  padding: 6px 12px;
+  font-size: 14px;
+}

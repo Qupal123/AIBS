@@ -2,7 +2,8 @@ const state = {
   rankId: localStorage.getItem("brawldraft-rank") || "diamond",
   modeId: null,
   mapName: null,
-  pickOrder: "us"
+  pickOrder: "us",
+  type: null // 'cards' or 'brawlers'
 };
 
 const screens = Array.from(document.querySelectorAll(".screen"));
@@ -16,10 +17,46 @@ const recSummary = document.getElementById("rec-summary");
 const banCards = document.getElementById("ban-cards");
 const pickCards = document.getElementById("pick-cards");
 const altCards = document.getElementById("alt-cards");
+const brawlerBanCards = document.getElementById("brawler-ban-cards");
+const brawlerPickCards = document.getElementById("brawler-pick-cards");
+const updateNotification = document.getElementById("update-notification");
+const updateBtn = document.getElementById("update-btn");
 
 const startBtn = document.getElementById("start-btn");
+const cardsBtn = document.getElementById("cards-btn");
+const brawlersBtn = document.getElementById("brawlers-btn");
+const cardsBtnType = document.getElementById("cards-btn-type");
+const brawlersBtnType = document.getElementById("brawlers-btn-type");
 const backButtons = Array.from(document.querySelectorAll(".back-btn"));
 const toggles = Array.from(document.querySelectorAll(".toggle"));
+
+// Update notification
+function checkForUpdates() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js').then(registration => {
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            showUpdateNotification();
+          }
+        });
+      });
+    });
+  }
+}
+
+function showUpdateNotification() {
+  updateNotification.classList.remove('hidden');
+}
+
+function hideUpdateNotification() {
+  updateNotification.classList.add('hidden');
+}
+
+updateBtn.addEventListener('click', () => {
+  window.location.reload();
+});
 
 const emojiDataUrl = (emoji) =>
   `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'><rect width='128' height='128' rx='20' ry='20' fill='%23151d2e'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='72'>${emoji}</text></svg>`;
@@ -245,6 +282,9 @@ function goTo(screenName) {
   }
   if (screenName === "recs") {
     renderRecommendations();
+  }
+  if (screenName === "brawlers") {
+    renderBrawlers();
   }
 }
 
@@ -504,6 +544,70 @@ function renderRecommendations() {
   });
 }
 
+function renderBrawlers() {
+  const tier = RANK_TO_TIER[state.rankId] || "low";
+  const meta = GLOBAL_META;
+
+  // Bans
+  const bans = scoreBans(meta, tier, new Set());
+  brawlerBanCards.innerHTML = "";
+  bans.forEach((name, idx) => {
+    const card = document.createElement("div");
+    card.className = "ban-card";
+    card.innerHTML = `
+      <div class="ban-number">${idx + 1}</div>
+      <div class="brawler-row">
+        <img alt="${name}">
+        <div>
+          <div class="brawler-name">${name}</div>
+          <div class="subtle">Рекомендуемый бан</div>
+        </div>
+      </div>
+    `;
+    const img = card.querySelector("img");
+    setImageWithFallback(img, brawlerImageCandidates(name), "🚫");
+    brawlerBanCards.appendChild(card);
+  });
+
+  // Picks
+  const scoredPicks = scorePicks(meta?.picks?.[tier] || [], new Set(), "us");
+  const picks = reorderPicksForOrder(scoredPicks, "us");
+  brawlerPickCards.innerHTML = "";
+  picks.slice(0, 6).forEach((pick, idx) => {
+    const card = document.createElement("div");
+    card.className = "pick-card";
+    card.innerHTML = `
+      <div class="pick-number">${idx + 1}</div>
+      <div class="brawler-row">
+        <img alt="${pick.name}">
+        <div>
+          <div class="brawler-name">${pick.name}</div>
+          <div class="role-tags">
+            <span class="tag role">${pick.role}</span>
+            ${pick.buffed || BUFFED.has(pick.name) ? '<span class="tag buffed">⚡ Баффи</span>' : ""}
+          </div>
+        </div>
+      </div>
+      <div class="counters">
+        <div class="counter-block green">
+          ✓ Контрит
+          <div class="mini-avatars">${renderMiniAvatars(pick.counters)}</div>
+        </div>
+        <div class="counter-block red">
+          ✗ Слаб против
+          <div class="mini-avatars">${renderMiniAvatars(pick.counteredBy)}</div>
+        </div>
+      </div>
+    `;
+    const img = card.querySelector("img");
+    setImageWithFallback(img, brawlerImageCandidates(pick.name), "⚡");
+    card.querySelectorAll(".mini-avatars img").forEach((mini) => {
+      setImageWithFallback(mini, brawlerImageCandidates(mini.dataset.name), "🎯");
+    });
+    brawlerPickCards.appendChild(card);
+  });
+}
+
 function renderMiniAvatars(list = []) {
   return list
     .slice(0, 3)
@@ -512,7 +616,23 @@ function renderMiniAvatars(list = []) {
 }
 
 function wireEvents() {
-  startBtn.addEventListener("click", () => goTo("rank"));
+  if (startBtn) startBtn.addEventListener("click", () => goTo("rank"));
+  if (cardsBtn) cardsBtn.addEventListener("click", () => {
+    state.type = 'cards';
+    goTo("rank");
+  });
+  if (brawlersBtn) brawlersBtn.addEventListener("click", () => {
+    state.type = 'brawlers';
+    goTo("brawlers");
+  });
+  if (cardsBtnType) cardsBtnType.addEventListener("click", () => {
+    state.type = 'cards';
+    goTo("rank");
+  });
+  if (brawlersBtnType) brawlersBtnType.addEventListener("click", () => {
+    state.type = 'brawlers';
+    goTo("brawlers");
+  });
 
   backButtons.forEach((btn) => {
     btn.addEventListener("click", () => goTo(btn.dataset.target));
@@ -585,6 +705,7 @@ function init() {
   wireEvents();
   renderRecommendations();
   registerServiceWorker();
+  checkForUpdates();
   initParticles();
 }
 

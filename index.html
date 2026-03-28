@@ -16,6 +16,12 @@
   <div class="glow glow-top"></div>
   <div class="glow glow-bottom"></div>
   <div id="app">
+    <div id="update-notification" class="update-notification hidden">
+      <div class="update-content">
+        <span>Доступно обновление!</span>
+        <button id="update-btn" class="primary small">Обновить</button>
+      </div>
+    </div>
     <section class="screen active" data-screen="home" id="screen-home">
       <div class="logo-wrap">
         <div class="lightning pulse">⚡</div>
@@ -25,11 +31,23 @@
         <p class="subtitle">Ranked Draft Helper</p>
       </div>
       <div class="home-actions">
-        <button class="primary" id="start-btn">Начать Ranked Draft</button>
+        <button class="primary" id="cards-btn">Карты</button>
+        <button class="primary" id="brawlers-btn">Персонажи</button>
       </div>
       <div class="meta-badge">
         <span class="dot"></span>
         Мета актуальна · Баффи учтены
+      </div>
+    </section>
+
+    <section class="screen" data-screen="type" id="screen-type">
+      <div class="header">
+        <button class="ghost back-btn" data-target="home">Назад</button>
+        <h1>Выбор типа</h1>
+      </div>
+      <div class="home-actions">
+        <button class="primary" id="cards-btn-type">Карты</button>
+        <button class="primary" id="brawlers-btn-type">Персонажи</button>
       </div>
     </section>
 
@@ -89,6 +107,21 @@
       <div class="block">
         <div class="block-title warning">💡 Альтернативы</div>
         <div id="alt-cards" class="cards horizontal"></div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="brawlers" id="screen-brawlers">
+      <div class="header">
+        <button class="ghost back-btn" data-target="home">Назад</button>
+        <h1>Пики и Баны Персонажей</h1>
+      </div>
+      <div class="block">
+        <div class="block-title danger">🚫 Баны</div>
+        <div id="brawler-ban-cards" class="cards horizontal"></div>
+      </div>
+      <div class="block">
+        <div class="block-title electric">⚡ Пики</div>
+        <div id="brawler-pick-cards" class="cards vertical"></div>
       </div>
     </section>
   </div>

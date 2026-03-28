@@ -1,4 +1,4 @@
-const CACHE_NAME = "brawldraft-v3";
+const CACHE_NAME = "brawldraft-v4";
 const ASSETS = [
   "./",
   "index.html",
