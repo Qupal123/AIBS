@@ -27,6 +27,10 @@ const cardsBtn = document.getElementById("cards-btn");
 const brawlersBtn = document.getElementById("brawlers-btn");
 const cardsBtnType = document.getElementById("cards-btn-type");
 const brawlersBtnType = document.getElementById("brawlers-btn-type");
+const rankedBtn = document.getElementById("ranked-btn");
+const normalBtn = document.getElementById("normal-btn");
+const compactBtn = document.getElementById("compact-btn");
+const fullscreenBtn = document.getElementById("fullscreen-btn");
 const backButtons = Array.from(document.querySelectorAll(".back-btn"));
 const toggles = Array.from(document.querySelectorAll(".toggle"));
 
@@ -617,21 +621,19 @@ function renderMiniAvatars(list = []) {
 
 function wireEvents() {
   if (startBtn) startBtn.addEventListener("click", () => goTo("rank"));
-  if (cardsBtn) cardsBtn.addEventListener("click", () => {
-    state.type = 'cards';
-    goTo("rank");
+  if (cardsBtn) cardsBtn.addEventListener("click", () => goTo("battle-type"));
+  if (brawlersBtn) brawlersBtn.addEventListener("click", () => goTo("brawlers"));
+  if (cardsBtnType) cardsBtnType.addEventListener("click", () => goTo("rank"));
+  if (brawlersBtnType) brawlersBtnType.addEventListener("click", () => goTo("brawlers"));
+  if (rankedBtn) rankedBtn.addEventListener("click", () => goTo("window-mode"));
+  if (normalBtn) normalBtn.addEventListener("click", () => goTo("mode"));
+  if (compactBtn) compactBtn.addEventListener("click", () => {
+    // Здесь можно реализовать логику для компактного режима
+    alert('Компактный режим выбран!');
   });
-  if (brawlersBtn) brawlersBtn.addEventListener("click", () => {
-    state.type = 'brawlers';
-    goTo("brawlers");
-  });
-  if (cardsBtnType) cardsBtnType.addEventListener("click", () => {
-    state.type = 'cards';
-    goTo("rank");
-  });
-  if (brawlersBtnType) brawlersBtnType.addEventListener("click", () => {
-    state.type = 'brawlers';
-    goTo("brawlers");
+  if (fullscreenBtn) fullscreenBtn.addEventListener("click", () => {
+    // Здесь можно реализовать логику для полноэкранного режима
+    alert('Полный экран выбран!');
   });
 
   backButtons.forEach((btn) => {

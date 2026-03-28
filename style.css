@@ -195,6 +195,68 @@ h1 {
   font-weight: 600;
 }
 
+/* Стили для выбора типа боя */
+.battle-type-list {
+  display: grid;
+  gap: 18px;
+  margin: 0 auto 24px;
+  max-width: 540px;
+}
+.battle-type-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  cursor: pointer;
+  justify-content: space-between;
+  padding: 22px 24px;
+}
+.battle-type-icon {
+  font-size: 38px;
+  margin-right: 8px;
+}
+.battle-type-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+.battle-type-desc {
+  color: var(--muted);
+  font-size: 15px;
+}
+.battle-type-arrow {
+  font-size: 28px;
+  color: var(--accent);
+  margin-left: 16px;
+}
+
+/* Стили для выбора режима окна */
+.window-mode-list {
+  display: grid;
+  gap: 18px;
+  margin: 0 auto 24px;
+  max-width: 420px;
+}
+.window-mode-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  cursor: pointer;
+  padding: 20px 22px;
+}
+.window-mode-icon {
+  font-size: 32px;
+  margin-right: 8px;
+}
+.window-mode-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text);
+}
+.window-mode-desc {
+  color: var(--muted);
+  font-size: 14px;
+}
+
 .dot {
   width: 10px;
   height: 10px;
