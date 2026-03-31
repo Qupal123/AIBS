@@ -1,9 +1,11 @@
+const APP_VERSION = "2.0";
+const RUSTORE_APP_URL = "https://apps.rustore.ru/app/ru.brawldraft"; // замени на реальный пакет
+
 const state = {
   rankId: localStorage.getItem("brawldraft-rank") || "diamond",
   modeId: null,
   mapName: null,
-  pickOrder: "us",
-  type: null // 'cards' or 'brawlers'
+  pickOrder: "us"
 };
 
 const screens = Array.from(document.querySelectorAll(".screen"));
@@ -17,50 +19,19 @@ const recSummary = document.getElementById("rec-summary");
 const banCards = document.getElementById("ban-cards");
 const pickCards = document.getElementById("pick-cards");
 const altCards = document.getElementById("alt-cards");
-const brawlerBanCards = document.getElementById("brawler-ban-cards");
-const brawlerPickCards = document.getElementById("brawler-pick-cards");
-const updateNotification = document.getElementById("update-notification");
-const updateBtn = document.getElementById("update-btn");
 
-const startBtn = document.getElementById("start-btn");
-const cardsBtn = document.getElementById("cards-btn");
-const brawlersBtn = document.getElementById("brawlers-btn");
-const cardsBtnType = document.getElementById("cards-btn-type");
-const brawlersBtnType = document.getElementById("brawlers-btn-type");
-const rankedBtn = document.getElementById("ranked-btn");
-const normalBtn = document.getElementById("normal-btn");
-const compactBtn = document.getElementById("compact-btn");
-const fullscreenBtn = document.getElementById("fullscreen-btn");
+const startRankedBtn = document.getElementById("start-ranked-btn");
+const startCasualBtn = document.getElementById("start-casual-btn");
 const backButtons = Array.from(document.querySelectorAll(".back-btn"));
 const toggles = Array.from(document.querySelectorAll(".toggle"));
 
-// Update notification
-function checkForUpdates() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js').then(registration => {
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            showUpdateNotification();
-          }
-        });
-      });
-    });
-  }
-}
-
-function showUpdateNotification() {
-  updateNotification.classList.remove('hidden');
-}
-
-function hideUpdateNotification() {
-  updateNotification.classList.add('hidden');
-}
-
-updateBtn.addEventListener('click', () => {
-  window.location.reload();
-});
+const updateOverlay = document.getElementById("update-overlay");
+const windowModeOverlay = document.getElementById("window-mode-overlay");
+const btnGoUpdate = document.getElementById("btn-go-update");
+const btnCloseApp = document.getElementById("btn-close-app");
+const btnCompact = document.getElementById("btn-compact-mode");
+const btnFullscreen = document.getElementById("btn-fullscreen-mode");
+const btnWindowModeOpen = document.getElementById("btn-window-mode-open");
 
 const emojiDataUrl = (emoji) =>
   `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'><rect width='128' height='128' rx='20' ry='20' fill='%23151d2e'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='72'>${emoji}</text></svg>`;
@@ -138,7 +109,7 @@ const titleCase = (value) =>
     .join(" ");
 
 const buildNameVariants = (name) => {
-  const cleaned = name.replace(/’/g, "'").trim();
+  const cleaned = name.replace(/'/g, "'").trim();
   const base = slugify(cleaned);
   const noApos = cleaned.replace(/'/g, "");
   const spaced = cleaned.replace(/_/g, " ");
@@ -286,9 +257,6 @@ function goTo(screenName) {
   }
   if (screenName === "recs") {
     renderRecommendations();
-  }
-  if (screenName === "brawlers") {
-    renderBrawlers();
   }
 }
 
@@ -548,70 +516,6 @@ function renderRecommendations() {
   });
 }
 
-function renderBrawlers() {
-  const tier = RANK_TO_TIER[state.rankId] || "low";
-  const meta = GLOBAL_META;
-
-  // Bans
-  const bans = scoreBans(meta, tier, new Set());
-  brawlerBanCards.innerHTML = "";
-  bans.forEach((name, idx) => {
-    const card = document.createElement("div");
-    card.className = "ban-card";
-    card.innerHTML = `
-      <div class="ban-number">${idx + 1}</div>
-      <div class="brawler-row">
-        <img alt="${name}">
-        <div>
-          <div class="brawler-name">${name}</div>
-          <div class="subtle">Рекомендуемый бан</div>
-        </div>
-      </div>
-    `;
-    const img = card.querySelector("img");
-    setImageWithFallback(img, brawlerImageCandidates(name), "🚫");
-    brawlerBanCards.appendChild(card);
-  });
-
-  // Picks
-  const scoredPicks = scorePicks(meta?.picks?.[tier] || [], new Set(), "us");
-  const picks = reorderPicksForOrder(scoredPicks, "us");
-  brawlerPickCards.innerHTML = "";
-  picks.slice(0, 6).forEach((pick, idx) => {
-    const card = document.createElement("div");
-    card.className = "pick-card";
-    card.innerHTML = `
-      <div class="pick-number">${idx + 1}</div>
-      <div class="brawler-row">
-        <img alt="${pick.name}">
-        <div>
-          <div class="brawler-name">${pick.name}</div>
-          <div class="role-tags">
-            <span class="tag role">${pick.role}</span>
-            ${pick.buffed || BUFFED.has(pick.name) ? '<span class="tag buffed">⚡ Баффи</span>' : ""}
-          </div>
-        </div>
-      </div>
-      <div class="counters">
-        <div class="counter-block green">
-          ✓ Контрит
-          <div class="mini-avatars">${renderMiniAvatars(pick.counters)}</div>
-        </div>
-        <div class="counter-block red">
-          ✗ Слаб против
-          <div class="mini-avatars">${renderMiniAvatars(pick.counteredBy)}</div>
-        </div>
-      </div>
-    `;
-    const img = card.querySelector("img");
-    setImageWithFallback(img, brawlerImageCandidates(pick.name), "⚡");
-    card.querySelectorAll(".mini-avatars img").forEach((mini) => {
-      setImageWithFallback(mini, brawlerImageCandidates(mini.dataset.name), "🎯");
-    });
-    brawlerPickCards.appendChild(card);
-  });
-}
-
 function renderMiniAvatars(list = []) {
   return list
     .slice(0, 3)
@@ -619,22 +523,81 @@ function renderMiniAvatars(list = []) {
     .join("");
 }
 
+function compareVersions(a, b) {
+  const pa = String(a).split(".").map(Number);
+  const pb = String(b).split(".").map(Number);
+  const len = Math.max(pa.length, pb.length);
+  for (let i = 0; i < len; i++) {
+    const na = pa[i] || 0;
+    const nb = pb[i] || 0;
+    if (na > nb) return 1;
+    if (na < nb) return -1;
+  }
+  return 0;
+}
+
+async function checkForUpdate() {
+  try {
+    const resp = await fetch("/version.json?t=" + Date.now());
+    if (!resp.ok) return;
+    const data = await resp.json();
+    if (data.requiredVersion && compareVersions(data.requiredVersion, APP_VERSION) > 0) {
+      showUpdateOverlay();
+    }
+  } catch (e) {
+  }
+}
+
+function showUpdateOverlay() {
+  updateOverlay.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function hideUpdateOverlay() {
+  updateOverlay.classList.add("hidden");
+  document.body.style.overflow = "";
+}
+
+function showWindowModeOverlay() {
+  windowModeOverlay.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function hideWindowModeOverlay() {
+  windowModeOverlay.classList.add("hidden");
+  document.body.style.overflow = "";
+}
+
+function applyWindowMode(mode) {
+  localStorage.setItem("brawldraft-window-mode", mode);
+  if (mode === "fullscreen") {
+    const el = document.documentElement;
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch(() => {});
+    } else if (el.webkitRequestFullscreen) {
+      el.webkitRequestFullscreen();
+    }
+  } else if (mode === "compact") {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    } else if (document.webkitFullscreenElement) {
+      document.webkitExitFullscreen();
+    }
+  }
+  hideWindowModeOverlay();
+}
+
+function checkWindowModeFirstLaunch() {
+  const saved = localStorage.getItem("brawldraft-window-mode");
+  if (!saved) {
+    showWindowModeOverlay();
+  }
+}
+
 function wireEvents() {
-  if (startBtn) startBtn.addEventListener("click", () => goTo("rank"));
-  if (cardsBtn) cardsBtn.addEventListener("click", () => goTo("battle-type"));
-  if (brawlersBtn) brawlersBtn.addEventListener("click", () => goTo("brawlers"));
-  if (cardsBtnType) cardsBtnType.addEventListener("click", () => goTo("rank"));
-  if (brawlersBtnType) brawlersBtnType.addEventListener("click", () => goTo("brawlers"));
-  if (rankedBtn) rankedBtn.addEventListener("click", () => goTo("window-mode"));
-  if (normalBtn) normalBtn.addEventListener("click", () => goTo("mode"));
-  if (compactBtn) compactBtn.addEventListener("click", () => {
-    // Здесь можно реализовать логику для компактного режима
-    alert('Компактный режим выбран!');
-  });
-  if (fullscreenBtn) fullscreenBtn.addEventListener("click", () => {
-    // Здесь можно реализовать логику для полноэкранного режима
-    alert('Полный экран выбран!');
-  });
+  startRankedBtn.addEventListener("click", () => goTo("rank"));
+
+  startCasualBtn.addEventListener("click", () => goTo("coming-soon"));
 
   backButtons.forEach((btn) => {
     btn.addEventListener("click", () => goTo(btn.dataset.target));
@@ -648,6 +611,32 @@ function wireEvents() {
   });
 
   goRecsBtn.addEventListener("click", () => goTo("recs"));
+
+  btnGoUpdate.addEventListener("click", () => {
+    window.open(RUSTORE_APP_URL, "_blank");
+  });
+
+  btnCloseApp.addEventListener("click", () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.close();
+    }
+  });
+
+  btnCompact.addEventListener("click", () => applyWindowMode("compact"));
+  btnFullscreen.addEventListener("click", () => applyWindowMode("fullscreen"));
+
+  btnWindowModeOpen.addEventListener("click", () => showWindowModeOverlay());
+
+  updateOverlay.addEventListener("click", (e) => {
+    if (e.target === updateOverlay) {
+    }
+  });
+
+  windowModeOverlay.addEventListener("click", (e) => {
+    if (e.target === windowModeOverlay) hideWindowModeOverlay();
+  });
 }
 
 function registerServiceWorker() {
@@ -707,8 +696,9 @@ function init() {
   wireEvents();
   renderRecommendations();
   registerServiceWorker();
-  checkForUpdates();
   initParticles();
+  checkWindowModeFirstLaunch();
+  checkForUpdate();
 }
 
 document.addEventListener("DOMContentLoaded", init);
