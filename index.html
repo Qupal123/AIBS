@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0e1a">
+  <title>BrawlDraft · Ranked Draft Helper</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="particles"></canvas>
+  <div class="glow glow-top"></div>
+  <div class="glow glow-bottom"></div>
+
+  <div id="update-overlay" class="update-overlay hidden">
+    <div class="update-box">
+      <div class="update-icon">🎉</div>
+      <div class="update-title">Хорошие новости!</div>
+      <div class="update-desc">Вышло обновление BrawlDraft.<br>Без обновления приложением нельзя пользоваться.</div>
+      <div class="update-version-badge">Версия 2.0 доступна</div>
+      <button class="primary update-btn" id="btn-go-update">Обновить в Рустор ↗</button>
+      <button class="ghost close-app-btn" id="btn-close-app">Закрыть приложение</button>
+    </div>
+  </div>
+
+  <div id="window-mode-overlay" class="window-mode-overlay hidden">
+    <div class="window-mode-box">
+      <div class="window-mode-icon">⚡</div>
+      <div class="window-mode-title">Как открыть?</div>
+      <div class="window-mode-desc">Выбери удобный режим. Его можно изменить в любой момент.</div>
+      <button class="window-mode-card" id="btn-compact-mode">
+        <span class="wm-icon">🗂</span>
+        <div>
+          <div class="wm-name">Компактный режим</div>
+          <div class="wm-hint">Плавающее окно, многозадачность</div>
+        </div>
+      </button>
+      <button class="window-mode-card" id="btn-fullscreen-mode">
+        <span class="wm-icon">🖥</span>
+        <div>
+          <div class="wm-name">Полный экран</div>
+          <div class="wm-hint">Развернуть на весь экран</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <div id="app">
+    <section class="screen active" data-screen="home" id="screen-home">
+      <div class="logo-wrap">
+        <div class="lightning pulse">⚡</div>
+        <div class="title">
+          <span class="title-main">BRAWL</span><span class="title-accent">DRAFT</span>
+        </div>
+        <p class="subtitle">Ranked Draft Helper</p>
+      </div>
+      <div class="home-actions">
+        <div class="home-mode-label">Выбери тип боя:</div>
+        <button class="home-mode-card" id="start-ranked-btn">
+          <span class="hm-icon"><img src="icons/icon_ranked_front.png" alt="Ранговый бой" onerror="this.outerHTML='⚔️'"></span>
+          <div class="hm-info">
+            <div class="hm-name">Ранговый бой</div>
+            <div class="hm-desc">Помощь в драфте с учётом меты и ранга</div>
+          </div>
+          <span class="hm-arrow">→</span>
+        </button>
+        <button class="home-mode-card" id="start-casual-btn">
+          <span class="hm-icon"><img src="icons/map_maker_icon.png" alt="Обычные карты" onerror="this.outerHTML='🗺️'"></span>
+          <div class="hm-info">
+            <div class="hm-name">Обычные карты</div>
+            <div class="hm-desc">Пики и советы для стандартных режимов</div>
+          </div>
+          <span class="hm-arrow">→</span>
+        </button>
+      </div>
+      <div class="meta-badge">
+        <span class="dot"></span>
+        Мета актуальна · Баффи учтены
+      </div>
+      <button class="window-mode-toggle-btn" id="btn-window-mode-open" title="Режим окна">⊞ Режим окна</button>
+    </section>
+
+    <section class="screen" data-screen="coming-soon" id="screen-coming-soon">
+      <div class="header">
+        <button class="ghost back-btn" data-target="home">Назад</button>
+        <h1>Обычные карты</h1>
+      </div>
+      <div class="coming-soon-wrap">
+        <div class="coming-soon-icon">🚧</div>
+        <div class="coming-soon-title">Скоро!</div>
+        <div class="coming-soon-desc">Раздел «Обычные карты» находится в разработке.<br>Новые карты и рекомендации появятся в следующем обновлении.</div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="rank" id="screen-rank">
+      <div class="header">
+        <button class="ghost back-btn" data-target="home">Назад</button>
+        <h1>Выбор ранга</h1>
+      </div>
+      <div id="current-rank-card" class="current-rank"></div>
+      <div id="rank-grid" class="grid grid-ranks"></div>
+    </section>
+
+    <section class="screen" data-screen="mode" id="screen-mode">
+      <div class="header">
+        <button class="ghost back-btn" data-target="rank">Назад</button>
+        <h1>Выбор режима</h1>
+      </div>
+      <div class="list" id="mode-list"></div>
+    </section>
+
+    <section class="screen" data-screen="map" id="screen-map">
+      <div class="header">
+        <button class="ghost back-btn" data-target="mode">Назад</button>
+        <h1>Выбор карты</h1>
+      </div>
+      <div class="list vertical" id="map-list"></div>
+    </section>
+
+    <section class="screen" data-screen="order" id="screen-order">
+      <div class="header">
+        <button class="ghost back-btn" data-target="map">Назад</button>
+        <h1>Порядок пика</h1>
+      </div>
+      <div id="order-summary" class="summary-card"></div>
+      <div class="toggle-group">
+        <button class="toggle active" data-order="us">👤 Мы выбираем первыми</button>
+        <button class="toggle" data-order="enemy">👥 Противник выбирает первым</button>
+      </div>
+      <button class="primary" id="go-recs">Получить рекомендации →</button>
+    </section>
+
+    <section class="screen" data-screen="recs" id="screen-recs">
+      <div class="header">
+        <button class="ghost back-btn" data-target="order">Назад</button>
+        <h1>Рекомендации</h1>
+      </div>
+      <div id="rec-summary" class="summary-card large"></div>
+      <div class="block">
+        <div class="block-title danger">🚫 Баны</div>
+        <div id="ban-cards" class="cards horizontal"></div>
+      </div>
+      <div class="block">
+        <div class="block-title electric">⚡ Пики</div>
+        <div class="meta-note">Пики учитывают текущую мету и баффи</div>
+        <div id="pick-cards" class="cards vertical"></div>
+      </div>
+      <div class="block">
+        <div class="block-title warning">💡 Альтернативы</div>
+        <div id="alt-cards" class="cards horizontal"></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

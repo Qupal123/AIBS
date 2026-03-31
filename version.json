@@ -1,0 +1,4 @@
+{
+  "requiredVersion": "2.0",
+  "note": "Bump requiredVersion to force update screen for existing users"
+}
